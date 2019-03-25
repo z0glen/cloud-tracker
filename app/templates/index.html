@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Cloud Tracker</title>
+        <meta charset="utf-8"/>
+        <script
+              src="http://code.jquery.com/jquery-3.3.1.min.js"
+              integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+              crossorigin="anonymous">
+        </script>
+    </head>
+    <body>
+        <h1>Cloud Tracker</h1>
+        <hr/>
+        <div id="input_data">
+            Choose the date to check: <input id="date" type="date"/><br/>
+            Select the latitude (default Boston): </p><input id="lat" type="number" value="42.3601"/></br>
+            Select the longitude (default Boston): </p><input id="long" type="number" value="-71.0589"/><br/>
+            <input type="submit" value="Submit" onclick="submit_data()"/></br>
+        </div>
+        <hr/>
+        <div id="data">
+            <p>Waiting for data...</p>
+        </div>
+        <script type="text/javascript">
+            function update_html(data) {
+                var content = "";
+                content += "<p>Sunrise: " + new Date(data.sunrise * 1000).toString() + "</p>";
+                content += "<p>->Weather report: " + data.sunrise_data.summary + "</p>";
+                content += "<p>Sunset: " + new Date(data.sunset * 1000).toString() + "</p>";
+                content += "<p>->Weather report: " + data.sunset_data.summary + "</p>";
+                return content;
+            }
+
+            function data() {
+                $.ajax({
+                    url: "/data",
+                    dataType: 'json',
+                    success: function(result) {
+                        $("#data").html(function() {
+                            sunrise = result.daily.data[0].sunriseTime; // in seconds
+                            sunset = result.daily.data[0].sunsetTime; // in seconds
+                            for (var i = 0; i < result.hourly.data.length; i++) {
+                                hour = result.hourly.data[i];
+                                if (Math.abs(hour.time - sunrise) <= 1800) {
+                                    sunrise_data = hour;
+                                } else if (Math.abs(hour.time - sunset) <= 1800) {
+                                    sunset_data = hour;
+                                }
+                            }
+                            data = {
+                                "sunrise": sunrise,
+                                "sunrise_data": sunrise_data,
+                                "sunset": sunset,
+                                "sunset_data": sunset_data
+                            };
+                            return update_html(data);
+                        });
+                    }
+                });
+            }
+
+            function submit_data() {
+                var data = $("#input_data");
+                var date = data.find("#date")[0].value;
+                var lat = data.find("#lat")[0].value;
+                var long = data.find("#long")[0].value;
+                var response = {
+                    "date": date,
+                    "lat": lat,
+                    "long": long
+                };
+                console.log(response);
+                $.ajax({
+                    url: "/form",
+                    data: response,
+                    dataType: 'json',
+                    success: function(result) {
+                        $("#data").html(function() {
+                            sunrise = result.daily.data[0].sunriseTime; // in seconds
+                            sunset = result.daily.data[0].sunsetTime; // in seconds
+                            for (var i = 0; i < result.hourly.data.length; i++) {
+                                hour = result.hourly.data[i];
+                                if (Math.abs(hour.time - sunrise) <= 1800) {
+                                    sunrise_data = hour;
+                                } else if (Math.abs(hour.time - sunset) <= 1800) {
+                                    sunset_data = hour;
+                                }
+                            }
+                            data = {
+                                "sunrise": sunrise,
+                                "sunrise_data": sunrise_data,
+                                "sunset": sunset,
+                                "sunset_data": sunset_data
+                            };
+                            return update_html(data);
+                        });
+                    }
+                });
+            }
+            window.onload = data;
+        </script>
+    </body>
+</html>
