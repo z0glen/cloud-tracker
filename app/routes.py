@@ -61,7 +61,7 @@ def send_email():
     s.quit()
 
 scheduler = BackgroundScheduler(daemon=True)
-scheduler.add_job(func=send_email, trigger='interval', hours=24)
+scheduler.add_job(func=send_email, trigger='cron', hour=12)
 scheduler.start()
 
 atexit.register(lambda: scheduler.shutdown())
@@ -79,7 +79,8 @@ def data():
 @app.route("/form")
 def form():
     d = request.args.get('date')
-    t = int(datetime.datetime.strptime(d, "%Y-%m-%d").timestamp())
+    t = int(datetime.datetime.strptime(d+"+0000", "%Y-%m-%d%z").timestamp() + 3600*12)
+    print(t)
     lat = request.args.get('lat')
     long = request.args.get('long')
     r = requests.get('https://api.darksky.net/forecast/' + DARK_SKY_KEY + '/' + lat + ',' + long + ',' + str(t) + '?exclude=currently,flags')
