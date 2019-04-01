@@ -2,8 +2,6 @@ from flask import Flask, render_template, jsonify, request
 import requests
 import time
 import datetime
-import smtplib
-import atexit
 import json
 import os
 
@@ -13,10 +11,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from app import app
 
 DARK_SKY_KEY = os.environ.get('DARK_SKY_KEY')
-ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
-ADMIN_EMAIL_PASSWORD = os.environ.get('ADMIN_EMAIL_PASSWORD')
-
-email_list = ['yakbakzak@gmail.com', 'mathmania3@gmail.com']
 
 def daily_forecast(t):
         r = requests.get('https://api.darksky.net/forecast/' + DARK_SKY_KEY + '/42.3601,-71.0589,' + str(t) + '?exclude=currently,flags')
@@ -46,25 +40,6 @@ def five_day_forecast():
         sunset_string = datetime.datetime.fromtimestamp(data[d]['sunset']).strftime('%H:%M')
         string += "On " + d + ", sunrise will be " + data[d]['sunrise_data'] + " at " + sunrise_string + " and sunset will be " + data[d]["sunset_data"] + " at " + sunset_string + "\n"
     return string
-
-def send_email():
-    s = smtplib.SMTP('smtp.gmail.com', 587)
-    s.starttls()
-    s.login(ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD)
-    for to_address in email_list:
-        msg = EmailMessage()
-        msg.set_content(five_day_forecast())
-        msg['Subject'] = '[Cloud Tracker] Five Day Forecast'
-        msg['From'] = ADMIN_EMAIL
-        msg['To'] = to_address
-        s.send_message(msg)
-    s.quit()
-
-scheduler = BackgroundScheduler(daemon=True)
-scheduler.add_job(func=send_email, trigger='cron', hour=12)
-scheduler.start()
-
-atexit.register(lambda: scheduler.shutdown())
 
 @app.route("/")
 def index():
