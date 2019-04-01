@@ -1,10 +1,11 @@
 import smtplib
 import atexit
+import os
 
 from email.message import EmailMessage
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from app import five_day_forecast
+from app.routes import five_day_forecast
 
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL')
 ADMIN_EMAIL_PASSWORD = os.environ.get('ADMIN_EMAIL_PASSWORD')
