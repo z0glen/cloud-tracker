@@ -2,7 +2,7 @@ import smtplib
 import os
 
 from email.message import EmailMessage
-from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.schedulers.background import BlockingScheduler
 
 from app.routes import five_day_forecast
 
@@ -24,6 +24,6 @@ def send_email():
         s.send_message(msg)
     s.quit()
 
-scheduler = BackgroundScheduler(daemon=True)
+scheduler = BlockingScheduler()
 scheduler.add_job(func=send_email, trigger='cron', hour=12)
 scheduler.start()
