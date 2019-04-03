@@ -1,5 +1,4 @@
 import smtplib
-import atexit
 import os
 
 from email.message import EmailMessage
@@ -28,5 +27,3 @@ def send_email():
 scheduler = BackgroundScheduler(daemon=True)
 scheduler.add_job(func=send_email, trigger='cron', hour=12)
 scheduler.start()
-
-atexit.register(lambda: scheduler.shutdown())
