@@ -27,9 +27,4 @@ def send_email():
         s.send_message(msg)
     s.quit()
 
-@scheduler.scheduled_job('interval', minutes=3)
-def test_job():
-    print('This job is run every three minutes.')
-
-# scheduler.add_job(func=send_email, trigger='cron', hour=12)
 scheduler.start()
