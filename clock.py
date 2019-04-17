@@ -11,6 +11,9 @@ ADMIN_EMAIL_PASSWORD = os.environ.get('ADMIN_EMAIL_PASSWORD')
 
 email_list = ['yakbakzak@gmail.com', 'mathmania3@gmail.com']
 
+scheduler = BlockingScheduler()
+
+@scheduler.scheduled_job('cron', hour=12)
 def send_email():
     s = smtplib.SMTP('smtp.gmail.com', 587)
     s.starttls()
@@ -24,6 +27,9 @@ def send_email():
         s.send_message(msg)
     s.quit()
 
-scheduler = BlockingScheduler()
-scheduler.add_job(func=send_email, trigger='cron', hour=12)
+@scheduler.scheduled_job('interval', minutes=3)
+def test_job():
+    print('This job is run every three minutes.')
+
+# scheduler.add_job(func=send_email, trigger='cron', hour=12)
 scheduler.start()
