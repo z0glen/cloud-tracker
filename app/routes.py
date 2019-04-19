@@ -4,6 +4,7 @@ import time
 import datetime
 import json
 import os
+import threading
 
 from email.message import EmailMessage
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -11,6 +12,19 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from app import app
 
 DARK_SKY_KEY = os.environ.get('DARK_SKY_KEY')
+
+def set_interval(func, sec):
+    def wrapper():
+        set_interval(func, sec)
+        func()
+    t = threading.Timer(sec, wrapper)
+    t.start()
+    return t
+
+def ping():
+    r = requests.get('https://yuge-cloud-tracker.herokuapp.com/')
+
+set_interval(ping, 10)
 
 def daily_forecast(t):
         r = requests.get('https://api.darksky.net/forecast/' + DARK_SKY_KEY + '/42.3601,-71.0589,' + str(t) + '?exclude=currently,flags')
