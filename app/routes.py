@@ -62,6 +62,8 @@ def index():
 @app.route("/data")
 def data():
     t = int(time.time())
+    print(t)
+    print(DARK_SKY_KEY)
     r = requests.get('https://api.darksky.net/forecast/' + DARK_SKY_KEY + '/42.3601,-71.0589,' + str(t) + '?exclude=currently,flags')
     return jsonify(r.json())
 
