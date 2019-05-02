@@ -34,13 +34,17 @@ def daily_forecast(t):
         for i, hour in enumerate(r.json()['hourly']['data']):
             if abs(hour['time'] - sunrise) <= 1800:
                 sunrise_data = hour['summary']
+                sunrise_cloud_cover = str(hour['cloudCover']*100)+'%'
             elif abs(hour['time'] - sunset) <= 1800:
                 sunset_data = hour['summary']
+                sunset_cloud_cover = str(hour['cloudCover']*100)+'%'
         data = {
             "sunrise": sunrise,
             "sunrise_data": sunrise_data,
+            "sunrise_cloud_cover": sunrise_cloud_cover,
             "sunset": sunset,
-            "sunset_data": sunset_data
+            "sunset_data": sunset_data,
+            "sunset_cloud_cover": sunset_cloud_cover
         }
         return data
 
@@ -49,13 +53,13 @@ def five_day_forecast():
     string = ""
     from_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
     to_tz = pytz.timezone('US/Eastern')
-    for i in range(1, 6):
+    for i in range(5):
         t = int(time.time() + i*24*60*60)
         d = datetime.datetime.fromtimestamp(t).strftime('%A %m-%d-%Y')
         data[d] = daily_forecast(t)
         sunrise_string = datetime.datetime.fromtimestamp(data[d]['sunrise']).replace(tzinfo=from_tz).astimezone(to_tz).strftime('%H:%M')
         sunset_string = datetime.datetime.fromtimestamp(data[d]['sunset']).replace(tzinfo=from_tz).astimezone(to_tz).strftime('%H:%M')
-        string += "On " + d + ", sunrise will be " + data[d]['sunrise_data'] + " at " + sunrise_string + " and sunset will be " + data[d]["sunset_data"] + " at " + sunset_string + "\n"
+        string += "On " + d + ", sunrise will be " + data[d]['sunrise_data'] + " (cloud cover: " + data[d]['sunrise_cloud_cover'] + ") at " + sunrise_string + " and sunset will be " + data[d]["sunset_data"] + " (cloud cover: " + data[d]['sunset_cloud_cover'] + ") at " + sunset_string + "\n"
     return string
 
 @app.route("/")
