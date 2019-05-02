@@ -5,6 +5,7 @@ import datetime
 import json
 import os
 import threading
+import pytz
 
 from email.message import EmailMessage
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -46,12 +47,14 @@ def daily_forecast(t):
 def five_day_forecast():
     data = {}
     string = ""
+    from_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
+    to_tz = pytz.timezone('US/Eastern')
     for i in range(1, 6):
         t = int(time.time() + i*24*60*60)
-        d = datetime.datetime.fromtimestamp(t).strftime('%m-%d-%Y')
+        d = datetime.datetime.fromtimestamp(t).strftime('%A %m-%d-%Y')
         data[d] = daily_forecast(t)
-        sunrise_string = datetime.datetime.fromtimestamp(data[d]['sunrise']).strftime('%H:%M')
-        sunset_string = datetime.datetime.fromtimestamp(data[d]['sunset']).strftime('%H:%M')
+        sunrise_string = datetime.datetime.fromtimestamp(data[d]['sunrise']).replace(tzinfo=from_tz).astimezone(to_tz).strftime('%H:%M')
+        sunset_string = datetime.datetime.fromtimestamp(data[d]['sunset']).replace(tzinfo=from_tz).astimezone(to_tz).strftime('%H:%M')
         string += "On " + d + ", sunrise will be " + data[d]['sunrise_data'] + " at " + sunrise_string + " and sunset will be " + data[d]["sunset_data"] + " at " + sunset_string + "\n"
     return string
 
