@@ -24,7 +24,7 @@ def set_interval(func, sec):
 def ping():
     r = requests.get('https://yuge-cloud-tracker.herokuapp.com/')
 
-set_interval(ping, 10)
+set_interval(ping, 1800)
 
 def daily_forecast(t):
         r = requests.get('https://api.darksky.net/forecast/' + DARK_SKY_KEY + '/42.3601,-71.0589,' + str(t) + '?exclude=currently,flags')
