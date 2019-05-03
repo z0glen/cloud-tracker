@@ -34,10 +34,10 @@ def daily_forecast(t):
         for i, hour in enumerate(r.json()['hourly']['data']):
             if abs(hour['time'] - sunrise) <= 1800:
                 sunrise_data = hour['summary']
-                sunrise_cloud_cover = str(hour['cloudCover']*100)+'%'
+                sunrise_cloud_cover = str(round(hour['cloudCover']*100))+'%'
             elif abs(hour['time'] - sunset) <= 1800:
                 sunset_data = hour['summary']
-                sunset_cloud_cover = str(hour['cloudCover']*100)+'%'
+                sunset_cloud_cover = str(round(hour['cloudCover']*100))+'%'
         data = {
             "sunrise": sunrise,
             "sunrise_data": sunrise_data,
@@ -50,7 +50,8 @@ def daily_forecast(t):
 
 def five_day_forecast():
     data = {}
-    string = ""
+    string = '<head><style type="text/css" media="screen">table th {color: white;background-color: black;}</style></head>'
+    string += '<body><table style="width:100%"><tr><th>Day</th><th>Sunrise</th><th>Sunrise Cloud Cover</th><th>Sunset</th><th>Sunset Cloud Cover</th></tr>'
     from_tz = datetime.datetime.now(datetime.timezone.utc).astimezone().tzinfo
     to_tz = pytz.timezone('US/Eastern')
     for i in range(5):
@@ -59,7 +60,9 @@ def five_day_forecast():
         data[d] = daily_forecast(t)
         sunrise_string = datetime.datetime.fromtimestamp(data[d]['sunrise']).replace(tzinfo=from_tz).astimezone(to_tz).strftime('%H:%M')
         sunset_string = datetime.datetime.fromtimestamp(data[d]['sunset']).replace(tzinfo=from_tz).astimezone(to_tz).strftime('%H:%M')
-        string += "On " + d + ", sunrise will be " + data[d]['sunrise_data'] + " (cloud cover: " + data[d]['sunrise_cloud_cover'] + ") at " + sunrise_string + " and sunset will be " + data[d]["sunset_data"] + " (cloud cover: " + data[d]['sunset_cloud_cover'] + ") at " + sunset_string + "\n"
+        background_color = "#eee" if i % 2 == 0 else "#fff"
+        string += '<tr style="background-color: '+background_color+';"><td>'+d+'</td><td>'+data[d]['sunrise_data']+'</td><td>'+data[d]['sunrise_cloud_cover']+'</td><td>'+data[d]["sunset_data"]+'</td><td>'+data[d]['sunset_cloud_cover']+'</td></tr>'
+    string += '</table></body>'
     return string
 
 @app.route("/")

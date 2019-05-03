@@ -1,7 +1,7 @@
 import smtplib
 import os
 
-from email.message import EmailMessage
+from email.mime.text import MIMEText
 from apscheduler.schedulers.background import BlockingScheduler
 
 from app.routes import five_day_forecast
@@ -19,8 +19,7 @@ def send_email():
     s.starttls()
     s.login(ADMIN_EMAIL, ADMIN_EMAIL_PASSWORD)
     for to_address in email_list:
-        msg = EmailMessage()
-        msg.set_content(five_day_forecast())
+        msg = MIMEText(five_day_forecast(), "html")
         msg['Subject'] = '[Cloud Tracker] Five Day Forecast'
         msg['From'] = ADMIN_EMAIL
         msg['To'] = to_address
