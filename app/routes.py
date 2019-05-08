@@ -13,6 +13,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from app import app
 
 DARK_SKY_KEY = os.environ.get('DARK_SKY_KEY')
+cloud_lower_threshold = 20
+cloud_upper_threshold = 50
 
 def set_interval(func, sec):
     def wrapper():
@@ -61,7 +63,10 @@ def five_day_forecast():
         sunrise_string = datetime.datetime.fromtimestamp(data[d]['sunrise']).replace(tzinfo=from_tz).astimezone(to_tz).strftime('%H:%M')
         sunset_string = datetime.datetime.fromtimestamp(data[d]['sunset']).replace(tzinfo=from_tz).astimezone(to_tz).strftime('%H:%M')
         background_color = "#eee" if i % 2 == 0 else "#fff"
-        string += '<tr style="background-color: '+background_color+';"><td>'+d+'</td><td>'+data[d]['sunrise_data']+'</td><td>'+data[d]['sunrise_cloud_cover']+'</td><td>'+data[d]["sunset_data"]+'</td><td>'+data[d]['sunset_cloud_cover']+'</td></tr>'
+        sunset_highlight = ' style="background-color: #71d624;">' if int(data[d]['sunset_cloud_cover'][:-1]) < cloud_upper_threshold and int(data[d]['sunset_cloud_cover'][:-1]) > cloud_lower_threshold else ">"
+        sunrise_highlight = ' style="background-color: #71d624;">' if int(data[d]['sunrise_cloud_cover'][:-1]) < cloud_upper_threshold and int(data[d]['sunrise_cloud_cover'][:-1]) > cloud_lower_threshold else ">"
+
+        string += '<tr style="background-color: '+background_color+';"><td>'+d+'</td><td>'+data[d]['sunrise_data']+'</td><td'+sunrise_highlight+data[d]['sunrise_cloud_cover']+'</td><td>'+data[d]["sunset_data"]+'</td><td'+sunset_highlight+data[d]['sunset_cloud_cover']+'</td></tr>'
     string += '</table></body>'
     return string
 
