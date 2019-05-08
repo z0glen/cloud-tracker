@@ -16,19 +16,6 @@ DARK_SKY_KEY = os.environ.get('DARK_SKY_KEY')
 cloud_lower_threshold = 20
 cloud_upper_threshold = 50
 
-def set_interval(func, sec):
-    def wrapper():
-        set_interval(func, sec)
-        func()
-    t = threading.Timer(sec, wrapper)
-    t.start()
-    return t
-
-def ping():
-    r = requests.get('https://yuge-cloud-tracker.herokuapp.com/')
-
-set_interval(ping, 1800)
-
 def daily_forecast(t):
         r = requests.get('https://api.darksky.net/forecast/' + DARK_SKY_KEY + '/42.3601,-71.0589,' + str(t) + '?exclude=currently,flags')
         sunrise = r.json()['daily']['data'][0]['sunriseTime']
