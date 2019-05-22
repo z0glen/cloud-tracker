@@ -1,102 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <title>Cloud Tracker</title>
-        <meta charset="utf-8"/>
-        <script
-              src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js">
-        </script>
-    </head>
-    <body>
-        <h1>Cloud Tracker</h1>
-        <hr/>
-        <div id="input_data">
-            Choose the date to check: <input id="date" type="date"/><br/>
-            Select the latitude (default Boston): </p><input id="lat" type="number" value="42.3601"/></br>
-            Select the longitude (default Boston): </p><input id="long" type="number" value="-71.0589"/><br/>
-            <input type="submit" value="Submit" onclick="submit_data()"/></br>
-        </div>
-        <hr/>
+{% extends 'base.html' %}
+
+{% block app_content %}
+    <div class="jumbotron">
+        <h1 class="display-4">Cloud Tracker</h1>
+        <p class="lead">Track the cloud cover for sunrise and sunset</p>
+    </div>
+    <div class="jumbotron">
+        <h1>Boston's Forecast</h1>
         <div id="data">
-            <p>Waiting for data...</p>
+            <table>
+                <thead>
+                    <tr><th><p>Day</p></th><th><p>Sunrise</p></th><th><p>Sunset</p></th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>-</td><td>-</td><td>-</td></tr>
+                    <tr><td>-</td><td>-</td><td>-</td></tr>
+                    <tr><td>-</td><td>-</td><td>-</td></tr>
+                    <tr><td>-</td><td>-</td><td>-</td></tr>
+                    <tr><td>-</td><td>-</td><td>-</td></tr>
+                </tbody>
+            </table>
         </div>
-        <script type="text/javascript">
-            function update_html(data) {
-                var content = "";
-                content += "<p>Sunrise: " + new Date(data.sunrise * 1000).toString() + "</p>";
-                content += "<p>->Weather report: " + data.sunrise_data.summary + "</p>";
-                content += "<p>Sunset: " + new Date(data.sunset * 1000).toString() + "</p>";
-                content += "<p>->Weather report: " + data.sunset_data.summary + "</p>";
-                return content;
-            }
+    </div>
+    <!-- Input form hidden because it just seems silly -->
+    <!-- <div id="input_data">
+        <p>Choose the date to check: </p><input id="date" type="date"/><br/>
+        <p>Select the latitude (default Boston): </p><input id="lat" type="number" value="42.3601"/></br>
+        <p>Select the longitude (default Boston): </p><input id="long" type="number" value="-71.0589"/><br/>
+        <input type="submit" value="Submit" onclick="submit_data()"/></br>
+    </div> -->
+    <!-- <hr/> -->
+    <script type="text/javascript">
+        var icon_lookup = {
+            "clear": '<i class="fas fa-sun fa-5x"></i>',
+            "cloudy": '<i class="fas fa-cloud fa-5x"></i>',
+            "partly": '<i class="fas fa-cloud-sun fa-5x"></i>'
+        };
 
-            function data() {
-                $.ajax({
-                    url: "/data",
-                    dataType: 'json',
-                    success: function(result) {
-                        $("#data").html(function() {
-                            sunrise = result.daily.data[0].sunriseTime; // in seconds
-                            sunset = result.daily.data[0].sunsetTime; // in seconds
-                            for (var i = 0; i < result.hourly.data.length; i++) {
-                                hour = result.hourly.data[i];
-                                if (Math.abs(hour.time - sunrise) <= 1800) {
-                                    sunrise_data = hour;
-                                } else if (Math.abs(hour.time - sunset) <= 1800) {
-                                    sunset_data = hour;
-                                }
-                            }
-                            data = {
-                                "sunrise": sunrise,
-                                "sunrise_data": sunrise_data,
-                                "sunset": sunset,
-                                "sunset_data": sunset_data
-                            };
-                            return update_html(data);
+        function update_forecast() {
+            $.ajax({
+                url: "/data",
+                dataType: 'json',
+                success: function(result) {
+                    var i = 0;
+                    for (date in result[0]) {
+                        var day_data = result[0][date];
+                        var row_data = $("table > tbody > tr")[i].childNodes;
+                        $(row_data[0]).html('<p>' + date + '</p>');
+                        $(row_data[1]).html(function() {
+                            var content = "";
+                            var icon = icon_lookup[day_data.sunrise_icon.split("-")[0]];
+                            content += icon + "<br>";
+                            var weight = (parseInt(day_data.sunrise_cloud_cover) > 20 && parseInt(day_data.sunrise_cloud_cover) < 50) ? "bold" : "normal";
+                            content += '<p style="font-weight: ' + weight + ';">' + day_data.sunrise_data + " (" + day_data.sunrise_cloud_cover + ")</p>";
+                            content += '<p>' + day_data.sunrise + '</p>';
+                            return content;
                         });
+                        $(row_data[2]).html(function() {
+                            var content = "";
+                            var icon = icon_lookup[day_data.sunset_icon.split("-")[0]];
+                            content += icon + "<br>";
+                            var weight = (parseInt(day_data.sunset_cloud_cover) > 20 && parseInt(day_data.sunset_cloud_cover) < 50) ? "bold" : "normal";
+                            content += '<p style="font-weight: ' + weight + ';">' + day_data.sunset_data + " (" + day_data.sunset_cloud_cover + ")</p>";
+                            content += '<p>' + day_data.sunset + '</p>';
+                            return content;
+                        });
+                        i++;
                     }
-                });
-            }
+                }
+            });
+        }
 
-            function submit_data() {
-                var data = $("#input_data");
-                var date = data.find("#date")[0].value;
-                var lat = data.find("#lat")[0].value;
-                var long = data.find("#long")[0].value;
-                var response = {
-                    "date": date,
-                    "lat": lat,
-                    "long": long
-                };
-                console.log(response);
-                $.ajax({
-                    url: "/form",
-                    data: response,
-                    dataType: 'json',
-                    success: function(result) {
-                        $("#data").html(function() {
-                            sunrise = result.daily.data[0].sunriseTime; // in seconds
-                            sunset = result.daily.data[0].sunsetTime; // in seconds
-                            for (var i = 0; i < result.hourly.data.length; i++) {
-                                hour = result.hourly.data[i];
-                                if (Math.abs(hour.time - sunrise) <= 1800) {
-                                    sunrise_data = hour;
-                                } else if (Math.abs(hour.time - sunset) <= 1800) {
-                                    sunset_data = hour;
-                                }
-                            }
-                            data = {
-                                "sunrise": sunrise,
-                                "sunrise_data": sunrise_data,
-                                "sunset": sunset,
-                                "sunset_data": sunset_data
-                            };
-                            return update_html(data);
-                        });
-                    }
-                });
-            }
-            window.onload = data;
-        </script>
-    </body>
-</html>
+        // form submission is hidden (see above)
+
+        // function submit_data() {
+        //     var data = $("#input_data");
+        //     var date = data.find("#date")[0].value;
+        //     var lat = data.find("#lat")[0].value;
+        //     var long = data.find("#long")[0].value;
+        //     var response = {
+        //         "date": date,
+        //         "lat": lat,
+        //         "long": long
+        //     };
+        //     $.ajax({
+        //         url: "/form",
+        //         data: response,
+        //         dataType: 'json',
+        //         success: function(result) {
+        //             $("#data").html(function() {
+        //                 sunrise = result.daily.data[0].sunriseTime; // in seconds
+        //                 sunset = result.daily.data[0].sunsetTime; // in seconds
+        //                 for (var i = 0; i < result.hourly.data.length; i++) {
+        //                     hour = result.hourly.data[i];
+        //                     if (Math.abs(hour.time - sunrise) <= 1800) {
+        //                         sunrise_data = hour;
+        //                     } else if (Math.abs(hour.time - sunset) <= 1800) {
+        //                         sunset_data = hour;
+        //                     }
+        //                 }
+        //                 data = {
+        //                     "sunrise": sunrise,
+        //                     "sunrise_data": sunrise_data,
+        //                     "sunset": sunset,
+        //                     "sunset_data": sunset_data
+        //                 };
+        //                 return update_html(data);
+        //             });
+        //         }
+        //     });
+        // }
+        window.onload = update_forecast;
+    </script>
+{% endblock %}
