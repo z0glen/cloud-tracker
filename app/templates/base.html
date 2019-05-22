@@ -1,0 +1,46 @@
+{% extends 'bootstrap/base.html' %}
+
+{% block title %}
+  {% if title %}{{ title }} - cloud tracker{% else %}cloud tracker{% endif %}
+{% endblock %}
+
+{% block styles %}
+  {{ super() }}
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/app.css') }}" />
+  <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js">
+  </script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+{% endblock %}
+
+{% block navbar %}
+  <nav class="navbar navbar-default">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="{{ url_for('index') }}">Cloud Tracker</a>
+      </div>
+    </div>
+  </nav>
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for message in messages %}
+      <div class="alert alert-info" role="alert">
+        {{message}}
+      </div>
+      {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% block app_content %}{% endblock %}
+  </div>
+{% endblock %}
