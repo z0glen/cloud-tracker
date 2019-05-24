@@ -34,8 +34,15 @@
         var icon_lookup = {
             "clear": '<i class="fas fa-sun fa-5x"></i>',
             "cloudy": '<i class="fas fa-cloud fa-5x"></i>',
-            "partly": '<i class="fas fa-cloud-sun fa-5x"></i>'
+            "partly": '<i class="fas fa-cloud-sun fa-5x"></i>',
+            "rain": '<i class="fas fa-cloud-rain fa-5x"></i>',
+            "snow": '<i class="fas fa-snowflake fa-5x"></i>',
+            "fog": '<i class="fas fa-smog fa-5x"></i>',
+            "sleet": '<i class="fas fa-cloud-rain fa-5x"></i>',
+            "wind": '<i class="fas fa-wind fa-5x"></i>',
         };
+
+        var default_icon = '<i class="far fa-question-circle fa-5x"></i>';
 
         function update_forecast() {
             $.ajax({
@@ -49,7 +56,7 @@
                         $(row_data[0]).html('<p>' + date + '</p>');
                         $(row_data[1]).html(function() {
                             var content = "";
-                            var icon = icon_lookup[day_data.sunrise_icon.split("-")[0]];
+                            var icon = icon_lookup[day_data.sunrise_icon.split("-")[0]] || default_icon;
                             content += icon + "<br>";
                             var weight = (parseInt(day_data.sunrise_cloud_cover) > 20 && parseInt(day_data.sunrise_cloud_cover) < 50) ? "bold" : "normal";
                             content += '<p style="font-weight: ' + weight + ';">' + day_data.sunrise_data + " (" + day_data.sunrise_cloud_cover + ")</p>";
@@ -58,7 +65,7 @@
                         });
                         $(row_data[2]).html(function() {
                             var content = "";
-                            var icon = icon_lookup[day_data.sunset_icon.split("-")[0]];
+                            var icon = icon_lookup[day_data.sunset_icon.split("-")[0]] || default_icon;
                             content += icon + "<br>";
                             var weight = (parseInt(day_data.sunset_cloud_cover) > 20 && parseInt(day_data.sunset_cloud_cover) < 50) ? "bold" : "normal";
                             content += '<p style="font-weight: ' + weight + ';">' + day_data.sunset_data + " (" + day_data.sunset_cloud_cover + ")</p>";
