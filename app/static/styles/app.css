@@ -24,7 +24,7 @@ tr:nth-child(2n) {
     background-color: #dddddd;
 }
 
-.navbar-header {
+/* .navbar-header {
     float: left;
     padding: 15px;
     text-align: center;
@@ -33,7 +33,7 @@ tr:nth-child(2n) {
 
 .navbar-brand {
     float: none;
-}
+} */
 
 .jumbotron {
   text-align: center;
