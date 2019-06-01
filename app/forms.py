@@ -21,3 +21,7 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
+
+class SettingsForm(FlaskForm):
+    daily_email = BooleanField('Receive Daily Emails?')
+    submit = SubmitField('Submit')

@@ -13,7 +13,7 @@ from email.message import EmailMessage
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from app import app, db
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, SettingsForm
 from app.models import User
 
 DARK_SKY_KEY = os.environ.get('DARK_SKY_KEY')
@@ -100,6 +100,17 @@ def register():
         flash('Welcome to Cloud Tracker!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    form = SettingsForm(obj=current_user)
+    if form.validate_on_submit():
+        current_user.daily_email = form.daily_email.data
+        db.session.commit()
+        flash('Your preferences have been updated')
+        return redirect(url_for('index'))
+    return render_template('settings.html', title='Settings', form=form)
 
 @app.route("/data")
 def data():
