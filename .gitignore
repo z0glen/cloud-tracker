@@ -2,3 +2,5 @@
 cloud_tracker/*
 vars.txt
 vars.sh
+
+app.db

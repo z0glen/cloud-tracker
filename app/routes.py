@@ -1,4 +1,5 @@
-from flask import Flask, render_template, jsonify, request, url_for
+from flask import Flask, render_template, jsonify, request, url_for, flash, redirect
+from flask_login import login_user, logout_user, current_user, login_required
 import requests
 import time
 import datetime
@@ -96,7 +97,7 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Welcome to our club!')
+        flash('Welcome to Cloud Tracker!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
