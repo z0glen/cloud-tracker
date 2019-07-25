@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request, url_for, flash, redi
 from flask_login import login_user, logout_user, current_user, login_required
 import time
 import json
+import datetime
 
 from app import app, db
 from app.forms import LoginForm, RegistrationForm, SettingsForm
@@ -26,6 +27,35 @@ def login():
             next_page = url_for('index')
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
+
+@app.route('/api/login', methods=['POST'])
+def api_login():
+    # print(request.args)
+    data = request.get_json()
+    # print(request.args.get('email'))
+    # print(request.args.get('password'))
+    print(request.get_json())
+    try:
+        user = User.query.filter_by(email=data.get('email')).first()
+        token = ''
+        if user and user.check_password(data.get('password')):
+            token = user.get_token()
+        else:
+            return jsonify({'status': 'fail', 'message': 'invalid username/password'}), 401
+        if token:
+            response = {
+                'status': 'success',
+                'message': 'Successfully logged in.',
+                'auth_token': token
+            }
+            return jsonify(response), 200
+    except Exception as e:
+        print(e)
+        response = {
+            'status': 'fail',
+            'message': 'Try again'
+        }
+        return jsonify(response), 500
 
 @app.route('/logout')
 def logout():
@@ -66,8 +96,18 @@ def data():
 
 @app.route("/emails")
 def get_emails():
-    emails = [u.email for u in User.query.filter_by(daily_email=True).all()]
-    return jsonify(emails)
+    auth_header = request.headers.get('Authorization')
+    auth_token = ''
+    if auth_header:
+        auth_token = auth_header.split(" ")[1]
+    if auth_token:
+        u = User.check_token(auth_token)
+        if u is not None:
+            emails = [u.email for u in User.query.filter_by(daily_email=True).all()]
+            return jsonify(emails)
+        else:
+            return jsonify({'status': 'fail', 'message': 'invalid or expired token'}), 401
+    return jsonify({'status': 'fail', 'message': 'no token found'}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
